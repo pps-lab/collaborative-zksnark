@@ -46,18 +46,20 @@ pub mod malicious_majority {
 }
 
 pub mod honest_majority {
+    use crate::GszPairingShare;
+
     use super::{
         share::msm::NaiveMsm,
         share::gsz20::{field::GszFieldShare, group::GszGroupShare},
-        wire::{field, group},
+        wire::{field, group, pairing},
     };
     pub type MpcField<F> = field::MpcField<F, GszFieldShare<F>>;
     pub type MpcGroup<G> = group::MpcGroup<G, GszGroupShare<G, NaiveMsm<G>>>;
-    // pub type MpcG1Affine<E> = pairing::MpcG1Affine<E, GszPairingShare<E>>;
-    // pub type MpcG2Affine<E> = pairing::MpcG2Affine<E, GszPairingShare<E>>;
-    // pub type MpcG1Projective<E> = pairing::MpcG1Projective<E, GszPairingShare<E>>;
-    // pub type MpcG2Projective<E> = pairing::MpcG2Projective<E, GszPairingShare<E>>;
-    // pub type MpcG1Prep<E> = pairing::MpcG1Prep<E, GszPairingShare<E>>;
-    // pub type MpcG2Prep<E> = pairing::MpcG2Prep<E, GszPairingShare<E>>;
-    // pub type MpcPairingEngine<E> = pairing::MpcPairingEngine<E, GszPairingShare<E>>;
+    pub type MpcG1Affine<E> = pairing::MpcG1Affine<E, GszPairingShare<E>>;
+    pub type MpcG2Affine<E> = pairing::MpcG2Affine<E, GszPairingShare<E>>;
+    pub type MpcG1Projective<E> = pairing::MpcG1Projective<E, GszPairingShare<E>>;
+    pub type MpcG2Projective<E> = pairing::MpcG2Projective<E, GszPairingShare<E>>;
+    pub type MpcG1Prep<E> = pairing::MpcG1Prep<E, GszPairingShare<E>>;
+    pub type MpcG2Prep<E> = pairing::MpcG2Prep<E, GszPairingShare<E>>;
+    pub type MpcPairingEngine<E> = pairing::MpcPairingEngine<E, GszPairingShare<E>>;
 }
