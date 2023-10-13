@@ -207,7 +207,7 @@ impl Computation {
                 let mpc_powers = powers_to_mpc::<GszPairingShare<ark_bls12_377::Bls12_377>>(powers);
                 let (commit, rand) =
                     ark_poly_commit::kzg10::KZG10::commit(&mpc_powers, &poly, None, None).unwrap();
-                println!("{:?}", commit);
+                //println!("{:?}", commit);
                 // let commit = commit_from_mpc_spdz(commit);
                 // println!("{:?}", commit);
                 //end_timer!(timer);
@@ -237,10 +237,10 @@ impl Computation {
 
             c => unimplemented!("Cannot run_dh {:?}", c),
         };
-        println!("Outputs:");
-        for (i, v) in outputs.iter().enumerate() {
-            println!("  {}: {}", i, v);
-        }
+        // println!("Outputs:");
+        // for (i, v) in outputs.iter().enumerate() {
+        //     println!("  {}: {}", i, v);
+        // }
         outputs
     }
     fn run_spdz(&self, inputs: Vec<MFrs>) -> Vec<MFrs> {
@@ -296,10 +296,10 @@ impl Computation {
 
             c => unimplemented!("Cannot run_dh {:?}", c),
         };
-        println!("Outputs:");
-        for (i, v) in outputs.iter().enumerate() {
-            println!("  {}: {}", i, v);
-        }
+        // println!("Outputs:");
+        // for (i, v) in outputs.iter().enumerate() {
+        //     println!("  {}: {}", i, v);
+        // }
         outputs
     }
 }
@@ -335,20 +335,20 @@ fn main() -> () {
         //     .iter()
         //     .map(|i| mm::MpcField::<Fr>::from_add_shared(Fr::from(*i)))
         //     .collect::<Vec<_>>();
-        println!("Inputs:");
-        for (i, v) in inputs.iter().enumerate() {
-            println!("  {}: {}", i, v);
-        }
+        // println!("Inputs:");
+        // for (i, v) in inputs.iter().enumerate() {
+        //     println!("  {}: {}", i, v);
+        // }
         match domain {
             ComputationDomain::BlsPairing => {
                 //let timer = start_timer!(|| "spdz for kzg");
                 let mut outputs = opt.computation.run_spdz(inputs);
                 //end_timer!(timer);
                 outputs.iter_mut().for_each(|c| c.publicize());
-                println!("Public Outputs:");
-                for (i, v) in outputs.iter().enumerate() {
-                    println!("  {}: {}", i, v);
-                }
+                // println!("Public Outputs:");
+                // for (i, v) in outputs.iter().enumerate() {
+                //     println!("  {}: {}", i, v);
+                // }
             }
             // ComputationDomain::Group | ComputationDomain::G1 => {
             //     let generator = mm::MpcGroup::<ark_bls12_377::G1Projective>::from_public(ark_bls12_377::G1Projective::prime_subgroup_generator());
@@ -367,20 +367,20 @@ fn main() -> () {
     } else {
         let mut rng = test_rng();
         let inputs: Vec<MFrg> = (0..opt.args).map(|_| MFrg::king_share(Fr::rand(&mut rng), &mut rng)).collect();
-        println!("Inputs:");
-        for (i, v) in inputs.iter().enumerate() {
-            println!("  {}: {}", i, v);
-        }
+        // println!("Inputs:");
+        // for (i, v) in inputs.iter().enumerate() {
+        //     println!("  {}: {}", i, v);
+        // }
         match domain {   
             ComputationDomain::BlsPairing => {
                 //let timer = start_timer!(|| "gsz for kzg");
                 let mut outputs = opt.computation.run_gsz(inputs);
                 //end_timer!(timer);
                 outputs.iter_mut().for_each(|c| c.publicize());
-                println!("Public Outputs:");
-                for (i, v) in outputs.iter().enumerate() {
-                    println!("  {}: {}", i, v);
-                }
+                // println!("Public Outputs:");
+                // for (i, v) in outputs.iter().enumerate() {
+                //     println!("  {}: {}", i, v);
+                // }
             }
             d => panic!("Bad domain: {:?}", d),
         }
