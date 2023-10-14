@@ -71,7 +71,7 @@ impl Connections {
         self.id = id;
     }
     fn connect_to_all(&mut self) {
-        let timer = start_timer!(|| "Connecting");
+        //let timer = start_timer!(|| "Connecting");
         let n = self.peers.len();
         for from_id in 0..n {
             for to_id in (from_id + 1)..n {
@@ -137,7 +137,7 @@ impl Connections {
                 assert!(self.peers[id].stream.is_some());
             }
         }
-        end_timer!(timer);
+        //end_timer!(timer);
     }
     fn am_king(&self) -> bool {
         self.id == 0

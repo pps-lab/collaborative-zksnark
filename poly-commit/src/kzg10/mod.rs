@@ -61,7 +61,7 @@ where
         let window_size = FixedBaseMSM::get_mul_window_size(max_degree + 1);
 
         let scalar_bits = E::Fr::size_in_bits();
-        let g_time = start_timer!(|| "Generating powers of G");
+        //let g_time = start_timer!(|| "Generating powers of G");
         let g_table = FixedBaseMSM::get_window_table(scalar_bits, window_size, g);
         let powers_of_g = FixedBaseMSM::multi_scalar_mul::<E::G1Projective>(
             scalar_bits,
@@ -69,8 +69,8 @@ where
             &g_table,
             &powers_of_beta,
         );
-        end_timer!(g_time);
-        let gamma_g_time = start_timer!(|| "Generating powers of gamma * G");
+        //end_timer!(g_time);
+        //let gamma_g_time = start_timer!(|| "Generating powers of gamma * G");
         let gamma_g_table = FixedBaseMSM::get_window_table(scalar_bits, window_size, gamma_g);
         let mut powers_of_gamma_g = FixedBaseMSM::multi_scalar_mul::<E::G1Projective>(
             scalar_bits,
@@ -81,7 +81,7 @@ where
         // Add an additional power of gamma_g, because we want to be able to support
         // up to D queries.
         powers_of_gamma_g.push(powers_of_gamma_g.last().unwrap().scalar_mul(&beta));
-        end_timer!(gamma_g_time);
+        //end_timer!(gamma_g_time);
 
         let powers_of_g = E::G1Projective::batch_normalization_into_affine(&powers_of_g);
         let powers_of_gamma_g =
@@ -155,12 +155,12 @@ where
         let num_leading_zeros = 0;
         let plain_coeffs = polynomial.coeffs();
 
-        let msm_time = start_timer!(|| "MSM to compute commitment to plaintext poly");
+        //let msm_time = start_timer!(|| "MSM to compute commitment to plaintext poly");
         let mut commitment = <E::G1Affine as AffineCurve>::multi_scalar_mul(
             &powers.powers_of_g[num_leading_zeros..],
             &plain_coeffs,
         );
-        end_timer!(msm_time);
+        //end_timer!(msm_time);
 
         let mut randomness = Randomness::<E::Fr, P>::empty();
         if let Some(hiding_degree) = hiding_bound {

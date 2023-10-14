@@ -753,7 +753,7 @@ macro_rules! impl_aff_proj {
                             .unwrap();
                     match MpcField::all_public_or_shared(scalars.into_iter().cloned()) {
                         Ok(pub_scalars) => {
-                            let t = start_timer!(|| "MSM inner");
+                            //let t = start_timer!(|| "MSM inner");
                             let r = $w_pro {
                                 // wat?
                                 val: if true {
@@ -776,7 +776,7 @@ macro_rules! impl_aff_proj {
                                     ))
                                 },
                             };
-                            end_timer!(t);
+                            //end_timer!(t);
                             r
                         }
                         Err(priv_scalars) => {

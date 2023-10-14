@@ -415,7 +415,7 @@ pub mod field {
     }
     pub fn check_field_products<F: FftField>(to_check: Vec<GszFieldTriple<F>>) {
         if to_check.len() > 0 {
-            let timer = start_timer!(|| format!("Product check: {}", to_check.len()));
+            //let timer = start_timer!(|| format!("Product check: {}", to_check.len()));
             debug!("Open Field: {} checks", to_check.len());
             let mut xs = Vec::new();
             let mut ys = Vec::new();
@@ -426,7 +426,7 @@ pub mod field {
                 zs.push(z);
             }
             hadamard_check(xs, ys, zs);
-            end_timer!(timer);
+            //end_timer!(timer);
         }
     }
 
