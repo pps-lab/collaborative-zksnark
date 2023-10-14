@@ -43,6 +43,18 @@ $BIN --hosts data/3 msm 128 --party 1 & ; pid1=$!
 $BIN --hosts data/3 msm 128 --party 2 & ; pid2=$!
 wait $pid0 $pid1 $pid2
 
+# ecdsa spdz 128 signatures
+$BIN --spdz --hosts data/3 ecdsa 128 --party 0 & ; pid0=$!
+$BIN --spdz --hosts data/3 ecdsa 128 --party 1 & ; pid1=$!
+$BIN --spdz --hosts data/3 ecdsa 128 --party 2 & ; pid2=$!
+wait $pid0 $pid1 
+
+# ecdsa gsz 128 signatures
+$BIN --hosts data/3 ecdsa 128 --party 0 & ; pid0=$!
+$BIN --hosts data/3 ecdsa 128 --party 1 & ; pid1=$!
+$BIN --hosts data/3 ecdsa 128 --party 2 & ; pid2=$!
+wait $pid0 $pid1 $pid2
+
 # # KZG commit (no blind)
 # $BIN --spdz --hosts data/3 kzgcommit 1 2 0 4 4 1 2 0 4 4 1 2 0 4 4 --party 0 & ; pid0=$!
 # $BIN --spdz --hosts data/3 kzgcommit 3 2 0 0 1 3 2 0 0 1 3 2 0 0 1 --party 1 & ; pid1=$!

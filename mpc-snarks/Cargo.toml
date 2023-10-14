@@ -17,6 +17,9 @@ ark-std = { path = "../utils", default-features = false, features = [ "print-tra
 ark-groth16 = { path = "../groth16", version = "0.2.0", default-features = false, features = [ "std" ] }
 ark-marlin = { path = "../marlin", version = "0.2.0", default-features = false, features = [ "std" ] }
 ark-poly-commit = { path = "../poly-commit", version = "0.2.0", default-features = false, features = [ "std" ] }
+ark-crypto-primitives = { path = "../crypto-primitives"}
+ark-sponge = {  path = "../ark-sponge", default-features = true }
+
 lazy_static = "1"
 derivative = { version = "2.0", features = ["use_core"]}
 log = {version = "0.4"}

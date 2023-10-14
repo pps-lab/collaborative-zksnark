@@ -252,7 +252,7 @@ impl<F: Field> FieldShare<F> for SpdzFieldShare<F> {
     Hash(bound = "T: Hash")
 )]
 pub struct SpdzGroupShare<T, M> {
-    sh: AdditiveGroupShare<T, M>,
+    pub sh: AdditiveGroupShare<T, M>,
     mac: AdditiveGroupShare<T, M>,
 }
 

@@ -3,9 +3,9 @@
 use ark_std::{start_timer, end_timer, test_rng, UniformRand};
 use log::debug;
 
-use ark_bls12_377::Fr;
+use ark_bls12_377::{Fr, FqParameters};
 use ark_ec::{group::Group, AffineCurve, PairingEngine, ProjectiveCurve};
-use ark_ff::Field;
+use ark_ff::{Field, PrimeField, Fp256, BigInteger256, BigInteger};
 use ark_poly::domain::radix2::Radix2EvaluationDomain;
 use ark_poly::univariate::DensePolynomial;
 use ark_poly::{EvaluationDomain, Polynomial, UVPolynomial};
@@ -13,10 +13,12 @@ use ark_poly_commit::marlin_pc;
 use ark_poly_commit::PolynomialCommitment;
 use ark_serialize::CanonicalSerialize;
 use ark_std::rand::SeedableRng;
-use rand::Rng;
+use rand::{Rng, random};
 use std::borrow::Cow;
 use std::path::PathBuf;
-
+use std::vec;
+use ark_sponge::{ CryptographicSponge, FieldBasedCryptographicSponge, poseidon::PoseidonSponge, poseidon::PoseidonParameters};
+use ark_sponge::poseidon_parameters_for_test;
 use mpc_algebra::com::ComField;
 use mpc_algebra::honest_but_curious as hbc;
 use mpc_algebra::malicious_majority as mm;
@@ -33,6 +35,11 @@ mod groth;
 mod marlin;
 mod plonk;
 mod silly;
+
+pub type PoseidonParam<F> = PoseidonParameters<F>;
+pub type SPNGFunction<F> = PoseidonSponge<F>;
+pub type SPNGOutput<F> = Vec<F>;
+pub type SPNGParam<F> = <SPNGFunction<F> as CryptographicSponge>::Parameters;
 
 arg_enum! {
     #[derive(PartialEq, Debug)]
@@ -63,6 +70,7 @@ arg_enum! {
         PcTwoCom,
         Plonk,
         PolyDiv,
+        Ecdsa
     }
 }
 
@@ -135,11 +143,56 @@ impl Opt {
             | Computation::Msm
             | Computation::KzgZkBatch
             | Computation::MarlinPc
+            | Computation::Ecdsa
             | Computation::MarlinPcBatch => ComputationDomain::BlsPairing,
             Computation::PolyEval => ComputationDomain::PolyField,
             _ => ComputationDomain::Field,
         }
     }
+}
+
+fn ecdsa_gsz (
+    x: MFrg, k: MFrg, p: <MEg as PairingEngine>::G1Projective, m: &[u8], params: SPNGParam<Fr>
+) -> MFrg {
+    let R = p.scalar_mul(&k);
+
+    let (x_coord, y_coord) = match R.val{
+        MpcGroup::Public(cp) => (cp.x, cp.y),
+        MpcGroup::Shared(cp) => (cp.val.x, cp.val.y),
+    };
+    let x_coord_bytes = x_coord.into_repr().to_bytes_le();
+    let r = MFrg::from_le_bytes_mod_order(&x_coord_bytes);
+    let mut sponge = PoseidonSponge::< >::new(&params);
+    sponge.absorb(&m);
+    let e: Fr = sponge.squeeze_native_field_elements(1)[0];
+    let rng = &mut test_rng();
+    let e_share = MFrg::Public(e);
+    let xr = x * r;
+    let mut s = e_share + xr;
+    s = s * k.inv().unwrap();
+    s
+}
+
+fn ecdsa_spdz (
+    x: MFrs, k: MFrs, p: <MEs as PairingEngine>::G1Projective, m: &[u8], params: SPNGParam<Fr>
+) -> MFrs {
+    let R = p.scalar_mul(&k);
+
+    let (x_coord, y_coord) = match R.val{
+        MpcGroup::Public(cp) => (cp.x, cp.y),
+        MpcGroup::Shared(cp) => (cp.sh.val.x, cp.sh.val.y),
+    };
+    let x_coord_bytes = x_coord.into_repr().to_bytes_le();
+    let r = MFrs::from_le_bytes_mod_order(&x_coord_bytes);
+    let mut sponge = PoseidonSponge::< >::new(&params);
+    sponge.absorb(&m);
+    let e: Fr = sponge.squeeze_native_field_elements(1)[0];
+    let xr = x * r;
+    let rng = &mut test_rng();
+    let e_share = MFrs::Public(e);
+    let mut s = e_share + xr;
+    s = s * k.inv().unwrap();
+    s
 }
 
 fn powers_to_mpc<'a, P: PairingShare<ark_bls12_377::Bls12_377>>(
@@ -235,6 +288,20 @@ impl Computation {
                 vec![]
             }
 
+            Computation::Ecdsa => {
+                let rng = &mut test_rng();
+
+                let random_bytes: Vec<Vec<u8>> = (0..inputs.len()).map(|_| (0..16).map(|_| rng.gen()).collect()).collect();
+                let parameters : SPNGParam<Fr> = poseidon_parameters_for_test();
+                for bytes in random_bytes {
+                    ecdsa_gsz(MFrg::king_share(Fr::rand(rng), rng), 
+                                MFrg::king_share(Fr::rand(rng), rng), 
+                                <MEg as PairingEngine>::G1Projective::prime_subgroup_generator(),
+                                 &bytes, parameters.clone());
+                }
+                vec![]
+            }
+
             c => unimplemented!("Cannot run_dh {:?}", c),
         };
         // println!("Outputs:");
@@ -293,6 +360,20 @@ impl Computation {
                 // assert_eq!(msm, expected);
                 vec![]
             }
+
+            Computation::Ecdsa => {
+                let rng = &mut test_rng();
+                let random_bytes: Vec<Vec<u8>> = (0..inputs.len()).map(|_| (0..16).map(|_| rng.gen()).collect()).collect();
+                let parameters : SPNGParam<Fr> = poseidon_parameters_for_test();
+                for bytes in random_bytes {
+                    ecdsa_spdz(MFrs::king_share(Fr::rand(rng), rng), 
+                                MFrs::king_share(Fr::rand(rng), rng), 
+                                <MEs as PairingEngine>::G1Projective::prime_subgroup_generator(),
+                                 &bytes, parameters.clone());
+                }
+                vec![]
+            }
+
 
             c => unimplemented!("Cannot run_dh {:?}", c),
         };
